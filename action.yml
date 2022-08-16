@@ -2,7 +2,7 @@ name: 'authentik Setup'
 description: 'Sets up an authentik test environment'
 inputs:
   version:
-    description: 'stable/beta'
+    description: 'stable/beta or any other version tag'
     required: false
     default: "stable"
   wait:
@@ -58,7 +58,9 @@ runs:
         if [ "${{ inputs.version }}" = "beta" ]; then
           echo "AUTHENTIK_IMAGE=goauthentik.io/dev-server" >> .env
           echo "AUTHENTIK_TAG=gh-next" >> .env
-          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=goauthentik.io/dev-%(type)s:gh-next" >> .env
+          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=goauthentik.io/dev-%(type)s:gh-%(build_hash)s" >> .env
+        elif [ "${{ inputs.version }}" != "stable" ]; then
+          echo "AUTHENTIK_TAG=${{ inputs.version }}" >> .env
         fi
         wget https://goauthentik.io/docker-compose.yml
 

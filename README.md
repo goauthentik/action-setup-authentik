@@ -12,7 +12,7 @@ This action deploys a local authentik instance in Docker using compose.
 
 ## Inputs:
 
-- `version`: can be set to `stable` or `beta`, defaults to `stable`.
+- `version`: can be set to `stable`, `beta` or any valid verison. Defaults to `stable`.
 - `wait`: bool, if set to true the action will wait for authentik to be available (waits 600 seconds)
 - `sentry_env`: Optionally set an environment for sentry reports
 
