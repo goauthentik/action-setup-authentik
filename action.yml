@@ -27,6 +27,12 @@ outputs:
   https_url:
     description: "Base URL to access authentik at (HTTPS)"
     value: https://localhost:9443
+  server_container_id:
+    description: id of the server container
+    value: ${{ steps.run.outputs.server_container }}
+  worker_container_id:
+    description: id of the worker container
+    value: ${{ steps.run.outputs.worker_container }}
 
 runs:
   using: "composite"
@@ -66,10 +72,17 @@ runs:
 
     - name: Run
       shell: bash
+      id: run
       run: |
         export COMPOSE_PROJECT_NAME=authentik
         docker-compose pull -q
         docker-compose up -d
+
+        server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
+        worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
+        echo "::set-output name=server_container::${server_container}"
+        echo "::set-output name=worker_container::${worker_container}"
+
         if [ "${{ inputs.wait }}" = "true" ]; then
           timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
         fi
