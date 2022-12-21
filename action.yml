@@ -53,10 +53,11 @@ runs:
       run: |
         AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
         echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> .env
-        echo "::set-output name=admin_token::${AUTHENTIK_BOOTSTRAP_TOKEN}"
+        echo "admin_token=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_OUTPUT
+
         AUTHENTIK_BOOTSTRAP_PASSWORD=$(openssl rand -base64 32)
         echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> .env
-        echo "::set-output name=admin_password::${AUTHENTIK_BOOTSTRAP_PASSWORD}"
+        echo "admin_password=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_OUTPUT
 
     - name: Configure
       shell: bash
@@ -84,6 +85,6 @@ runs:
         echo "::set-output name=worker_container::${worker_container}"
 
         if [ "${{ inputs.wait }}" = "true" ]; then
-          timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
+          timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
         fi
         docker-compose logs
