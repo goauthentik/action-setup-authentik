@@ -63,9 +63,9 @@ runs:
       shell: bash
       run: |
         if [ "${{ inputs.version }}" = "beta" ]; then
-          echo "AUTHENTIK_IMAGE=goauthentik.io/dev-server" >> .env
+          echo "AUTHENTIK_IMAGE=ghcr.io/goauthentik/dev-server" >> .env
           echo "AUTHENTIK_TAG=gh-next" >> .env
-          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=goauthentik.io/dev-%(type)s:gh-%(build_hash)s" >> .env
+          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s" >> .env
         elif [ "${{ inputs.version }}" != "stable" ]; then
           echo "AUTHENTIK_TAG=${{ inputs.version }}" >> .env
         fi
