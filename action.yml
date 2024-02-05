@@ -41,7 +41,7 @@ runs:
       shell: bash
       run: |
         echo "PG_PASS=$(openssl rand -base64 32)" >> .env
-        echo "AUTHENTIK_SECRET_KEY=$(openssl rand -base64 32)" >> .env
+        echo "AUTHENTIK_SECRET_KEY=$(openssl rand -base64 40)" >> .env
         echo "AUTHENTIK_ERROR_REPORTING__ENABLED=true" >> .env
         echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> .env
         echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> .env
