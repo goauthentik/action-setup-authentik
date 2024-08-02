@@ -76,8 +76,8 @@ runs:
       id: run
       run: |
         export COMPOSE_PROJECT_NAME=authentik
-        docker-compose pull -q
-        docker-compose up -d
+        docker compose pull -q
+        docker compose up -d
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
         worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
@@ -87,4 +87,4 @@ runs:
         if [ "${{ inputs.wait }}" = "true" ]; then
           timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
         fi
-        docker-compose logs
+        docker compose logs
