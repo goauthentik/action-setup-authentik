@@ -40,8 +40,14 @@ runs:
     - name: Prepare common variables
       shell: bash
       run: |
-        echo "PG_PASS=$(openssl rand -base64 32)" >> .env
-        echo "AUTHENTIK_SECRET_KEY=$(openssl rand -base64 40)" >> .env
+        pg_pass=$(openssl rand -base64 32)
+        secret_key=$(openssl rand -base64 40)
+
+        echo "::add-mask::${pg_pass}"
+        echo "::add-mask::${secret_key}"
+
+        echo "PG_PASS=${pg_pass}" >> .env
+        echo "AUTHENTIK_SECRET_KEY=${secret_key}" >> .env
         echo "AUTHENTIK_ERROR_REPORTING__ENABLED=true" >> .env
         echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> .env
         echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> .env
@@ -52,10 +58,12 @@ runs:
       id: credentials
       run: |
         AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
+        echo "::add-mask::${AUTHENTIK_BOOTSTRAP_TOKEN}"
         echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> .env
         echo "admin_token=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_OUTPUT
 
         AUTHENTIK_BOOTSTRAP_PASSWORD=$(openssl rand -base64 32)
+        echo "::add-mask::${AUTHENTIK_BOOTSTRAP_PASSWORD}"
         echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> .env
         echo "admin_password=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_OUTPUT
 
