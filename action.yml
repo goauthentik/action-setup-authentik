@@ -13,6 +13,10 @@ inputs:
     description: 'Sentry environment to send traces to.'
     required: false
     default: "github-actions"
+  blueprints_path:
+    description: "Optional path to a folder containing blueprints, which are mounted into the authentik containers."
+    required: false
+    default: ""
 
 outputs:
   admin_token:
@@ -78,6 +82,19 @@ runs:
           echo "AUTHENTIK_TAG=${{ inputs.version }}" >> .env
         fi
         wget https://goauthentik.io/docker-compose.yml
+
+    - name: Add override
+      shell: bash
+      if: ${{ inputs.blueprints_path != '' }}
+      env:
+        BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
+      run: |
+        cat <<EOT >> docker-compose.override.yaml
+        services:
+          server:
+              volumes:
+                  - ${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
+        EOT
 
     - name: Run
       shell: bash
