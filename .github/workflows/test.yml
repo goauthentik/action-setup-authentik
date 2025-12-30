@@ -29,13 +29,12 @@ jobs:
             options:
               version: "beta"
               sentry_env: "goauthentik-action-setup-authentik-ci"
-          - label: "Blueprints + Wait"
+          - label: "Blueprints"
             options:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
-              wait: true
-          - label: "Blueprints + Wait (auth)"
+          - label: "Blueprints + Custom wait with auth"
             options:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"

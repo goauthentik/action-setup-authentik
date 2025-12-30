@@ -17,15 +17,15 @@ inputs:
     description: 'Command to check if authentik is running and configured'
     required: false
     default: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-        while true; do
-            status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
-            if [[ $status == "200" ]]; then
-                exit 0
-            fi
-        done
+      if [[ $RUNNER_DEBUG == '1' ]]; then
+          set -x
+      fi
+      while true; do
+          status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
+          if [[ $status == "200" ]]; then
+              exit 0
+          fi
+      done
   blueprints_path:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
     required: false
