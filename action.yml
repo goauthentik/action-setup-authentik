@@ -104,6 +104,7 @@ runs:
       run: |
         if [[ $RUNNER_DEBUG == '1' ]]; then
             set -x
+            echo "AUTHENTIK_LOG_LEVEL=debug" >> "${ak_temp_dir}/.env"
         fi
         if [ "${{ inputs.version }}" = "beta" ]; then
           echo "AUTHENTIK_IMAGE=ghcr.io/goauthentik/dev-server" >> "${ak_temp_dir}/.env"

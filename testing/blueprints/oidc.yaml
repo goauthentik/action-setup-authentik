@@ -14,6 +14,11 @@ entries:
       identifiers:
         name: Default - Provider invalidation flow
       required: true
+  - model: authentik_blueprints.metaapplyblueprint
+    attrs:
+      identifiers:
+        name: System - OAuth2 Provider - Scopes
+      required: true
 
   - id: provider
     model: authentik_providers_oauth2.oauth2provider
