@@ -95,7 +95,7 @@ runs:
         elif [ "${{ inputs.version }}" != "stable" ]; then
           echo "AUTHENTIK_TAG=${{ inputs.version }}" >> "${ak_temp_dir}/.env"
         fi
-        wget https://goauthentik.io/docker-compose.yml -o "${ak_temp_dir}/docker-compose.yml"
+        wget https://goauthentik.io/docker-compose.yml -O "${ak_temp_dir}/docker-compose.yml"
 
     - name: Add blueprints override
       shell: bash
@@ -117,8 +117,6 @@ runs:
       id: run
       run: |
         set -xeuo pipefail
-        cat "${ak_temp_dir}/docker-compose.override.yml"
-        cat "${ak_temp_dir}/docker-compose.yml"
         export COMPOSE_PROJECT_NAME=authentik
         docker compose -f "${ak_temp_dir}/docker-compose.yml" -f "${ak_temp_dir}/docker-compose.override.yml" pull -q
         docker compose -f "${ak_temp_dir}/docker-compose.yml" -f "${ak_temp_dir}/docker-compose.override.yml" up -d
