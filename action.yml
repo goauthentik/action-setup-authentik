@@ -123,9 +123,7 @@ runs:
             set -x
         fi
         path=$(realpath "${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}")
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            ls ${path}
-        fi
+        echo "blueprints_files=$(find -type f ${path})" >> $GITHUB_ENV
         cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
         services:
           worker:
@@ -151,6 +149,11 @@ runs:
         echo "server_container=${server_container}" >> $GITHUB_OUTPUT
         echo "worker_container=${worker_container}" >> $GITHUB_OUTPUT
 
+    - name: Apply blueprints
+      shell: bash
+      run: |
+        set -x
+        echo $GITHUB_ENV
         echo '${{ inputs.wait_command }}' > "${ak_temp_dir}/wait.sh"
 
         if [ "${{ inputs.wait }}" = "true" ]; then
