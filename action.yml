@@ -114,7 +114,7 @@ runs:
           echo "AUTHENTIK_TAG=${{ inputs.version }}" >> "${ak_temp_dir}/.env"
         fi
         wget https://goauthentik.io/docker-compose.yml -O "${ak_temp_dir}/docker-compose.yml"
-        echo _ak_dc="docker compose -f ${ak_temp_dir}/docker-compose.yml" >> $GITHUB_ENV
+        echo _ak_dc="docker compose --env-file ${ak_temp_dir}/.env -f ${ak_temp_dir}/docker-compose.yml" >> $GITHUB_ENV
 
     - name: Add blueprints override
       shell: bash
