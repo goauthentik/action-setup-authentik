@@ -45,7 +45,7 @@ jobs:
                     set -x
                 fi
                 while true; do
-                    objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD} https://id.goauthentik.io/api/v3/providers/all/?search=test)
+                    objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD}" https://id.goauthentik.io/api/v3/providers/all/?search=test)
                     count=$(echo $output | jq .pagination.count)
                     if [[ "$count" == "1" ]]; then
                         exit 0
