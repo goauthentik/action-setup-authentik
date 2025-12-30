@@ -147,7 +147,7 @@ runs:
         echo "--- Pulling authentik images..."
         docker compose -f "${ak_temp_dir}/docker-compose.yml" pull -q
         echo "--- Starting authentik..."
-        docker compose -f "${ak_temp_dir}/docker-compose.yml" up -d # --wait
+        docker compose -f "${ak_temp_dir}/docker-compose.yml" up -d --wait
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
         worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
@@ -178,4 +178,5 @@ runs:
       shell: bash
       if: ${{ always() }}
       run: |
+        export COMPOSE_PROJECT_NAME=authentik
         docker compose -f "${ak_temp_dir}/docker-compose.yml" logs
