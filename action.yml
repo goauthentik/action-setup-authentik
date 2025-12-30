@@ -157,4 +157,9 @@ runs:
           echo "Waiting for authentik to be up and running..."
           timeout 600 bash "${ak_temp_dir}/wait.sh" || false
         fi
+
+    - name: Logs
+      shell: bash
+      if: ${{ always() }}
+      run: |
         docker compose -f "${ak_temp_dir}/docker-compose.yml" logs
