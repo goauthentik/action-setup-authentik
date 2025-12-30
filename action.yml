@@ -125,7 +125,10 @@ runs:
         fi
         path=$(realpath "${GITHUB_WORKSPACE}/${INPUT_BLUEPRINTS_PATH}")
         blueprints_files=$(find "${path}" -type f)
-        echo "blueprints_files=${blueprints_files}" >> $GITHUB_ENV
+        echo "blueprints_files<<EOF" >> $GITHUB_ENV
+        echo "${blueprints_files}" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
+
         cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
         services:
           worker:
