@@ -45,27 +45,27 @@ jobs:
                     fi
                     sleep 5
                 done
-          - label: "Blueprints + Custom wait with auth"
+          - label: "Blueprints + External wait"
             options:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
-              wait_command: |
-                if [[ $RUNNER_DEBUG == '1' ]]; then
-                    set -x
-                fi
-                while true; do
-                    objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD}" http://localhost:9000/api/v3/providers/all/?search=test)
-                    echo $output
-                    count=$(echo $output | jq .pagination.count)
-                    if [[ "$count" == "1" ]]; then
-                        exit 0
-                    fi
-                    sleep 5
-                done
+            test: |
+              if [[ $RUNNER_DEBUG == '1' ]]; then
+                  set -x
+              fi
+              while true; do
+                  objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD}" 'http://localhost:9000/api/v3/providers/all/?search=test')
+                  echo $output
+                  count=$(echo $output | jq .pagination.count)
+                  if [[ "$count" == "1" ]]; then
+                      exit 0
+                  fi
+                  sleep 5
+              done
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
-      - run: |
-          echo "RUNNER_DEBUG=1" >> $GITHUB_ENV
       - uses: ./
         with: ${{ matrix.cases.options }}
+      - if: ${{ matrix.cases.test != '' }}
+        run: ${{ matrix.cases.test}}
