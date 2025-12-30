@@ -81,6 +81,7 @@ runs:
         echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> "${ak_temp_dir}/.env"
         echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> "${ak_temp_dir}/.env"
         echo "AUTHENTIK_DISABLE_STARTUP_ANALYTICS=true" >> "${ak_temp_dir}/.env"
+        echo "CI" >> "${ak_temp_dir}/.env"
 
     - name: Generate credentials
       shell: bash
@@ -117,13 +118,13 @@ runs:
       shell: bash
       if: ${{ inputs.blueprints_path != '' }}
       env:
-        BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
+        INPUT_BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
       run: |
         if [[ $RUNNER_DEBUG == '1' ]]; then
             set -x
         fi
-        path=$(realpath "${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}")
-        echo "blueprints_files=$(find -type f ${path})" >> $GITHUB_ENV
+        path=$(realpath "${GITHUB_WORKSPACE}/${INPUT_BLUEPRINTS_PATH}")
+        echo "blueprints_files=$(find ${path} -type f)" >> $GITHUB_ENV
         cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
         services:
           worker:
@@ -154,6 +155,10 @@ runs:
       run: |
         set -x
         echo $blueprints_files
+
+    - name: Wait
+      shell: bash
+      run: |
         echo '${{ inputs.wait_command }}' > "${ak_temp_dir}/wait.sh"
 
         if [ "${{ inputs.wait }}" = "true" ]; then
