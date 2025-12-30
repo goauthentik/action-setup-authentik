@@ -107,13 +107,15 @@ runs:
         services:
           server:
             volumes:
-              - ${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
+              - "${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik"
         EOT
 
     - name: Run
       shell: bash
       id: run
       run: |
+        cat "${ak_temp_dir}/docker-compose.override.yaml"
+        cat "${ak_temp_dir}/docker-compose.yaml"
         export COMPOSE_PROJECT_NAME=authentik
         docker compose -f "${ak_temp_dir}/docker-compose.yml" pull -q
         docker compose -f "${ak_temp_dir}/docker-compose.yml" up -d
