@@ -17,7 +17,9 @@ inputs:
     description: 'Command to check if authentik is running and configured'
     required: false
     default: |
-        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do
+            sleep 5;
+        done
   blueprints_path:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
     required: false
@@ -123,7 +125,12 @@ runs:
         echo "server_container=${server_container}" >> $GITHUB_OUTPUT
         echo "worker_container=${worker_container}" >> $GITHUB_OUTPUT
 
+        # https://stackoverflow.com/a/76432068
+        # Expand variables but don't execute commands
+        cat <<EOF > "${ak_temp_dir}/wait.sh"
+        ${{ inputs.wait_command }}
+        EOF
         if [ "${{ inputs.wait }}" = "true" ]; then
-          timeout 600 bash -c "${{ inputs.wait_command }}" || false
+          timeout 600 bash "${ak_temp_dir}/wait.sh" || false
         fi
         docker compose -f "${ak_temp_dir}/docker-compose.yml" logs
