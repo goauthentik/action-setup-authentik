@@ -153,7 +153,7 @@ runs:
       shell: bash
       run: |
         set -x
-        echo $GITHUB_ENV
+        echo $blueprints_files
         echo '${{ inputs.wait_command }}' > "${ak_temp_dir}/wait.sh"
 
         if [ "${{ inputs.wait }}" = "true" ]; then
