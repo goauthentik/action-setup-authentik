@@ -41,6 +41,15 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Generate temp dir
+      shell: bash
+      id: setup
+      run: |
+        temp_dir="${RUNNER_TEMP}/${GITHUB_ACTION}"
+        mkdir -p ${temp_dir}
+
+        echo "temp_dir=${temp_dir}" >> $GITHUB_OUTPUT
+
     - name: Prepare common variables
       shell: bash
       run: |
@@ -50,12 +59,12 @@ runs:
         echo "::add-mask::${pg_pass}"
         echo "::add-mask::${secret_key}"
 
-        echo "PG_PASS=${pg_pass}" >> .env
-        echo "AUTHENTIK_SECRET_KEY=${secret_key}" >> .env
-        echo "AUTHENTIK_ERROR_REPORTING__ENABLED=true" >> .env
-        echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> .env
-        echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> .env
-        echo "AUTHENTIK_DISABLE_STARTUP_ANALYTICS=true" >> .env
+        echo "PG_PASS=${pg_pass}" >> "${{ steps.setup.outputs.dir }}/.env"
+        echo "AUTHENTIK_SECRET_KEY=${secret_key}" >> "${{ steps.setup.outputs.dir }}/.env"
+        echo "AUTHENTIK_ERROR_REPORTING__ENABLED=true" >> "${{ steps.setup.outputs.dir }}/.env"
+        echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> "${{ steps.setup.outputs.dir }}/.env"
+        echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> "${{ steps.setup.outputs.dir }}/.env"
+        echo "AUTHENTIK_DISABLE_STARTUP_ANALYTICS=true" >> "${{ steps.setup.outputs.dir }}/.env"
 
     - name: Generate credentials
       shell: bash
@@ -63,25 +72,25 @@ runs:
       run: |
         AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
         echo "::add-mask::${AUTHENTIK_BOOTSTRAP_TOKEN}"
-        echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> .env
+        echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> "${{ steps.setup.outputs.dir }}/.env"
         echo "admin_token=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_OUTPUT
 
         AUTHENTIK_BOOTSTRAP_PASSWORD=$(openssl rand -base64 32)
         echo "::add-mask::${AUTHENTIK_BOOTSTRAP_PASSWORD}"
-        echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> .env
+        echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> "${{ steps.setup.outputs.dir }}/.env"
         echo "admin_password=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_OUTPUT
 
     - name: Configure
       shell: bash
       run: |
         if [ "${{ inputs.version }}" = "beta" ]; then
-          echo "AUTHENTIK_IMAGE=ghcr.io/goauthentik/dev-server" >> .env
-          echo "AUTHENTIK_TAG=gh-next" >> .env
-          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s" >> .env
+          echo "AUTHENTIK_IMAGE=ghcr.io/goauthentik/dev-server" >> "${{ steps.setup.outputs.dir }}/.env"
+          echo "AUTHENTIK_TAG=gh-next" >> "${{ steps.setup.outputs.dir }}/.env"
+          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s" >> "${{ steps.setup.outputs.dir }}/.env"
         elif [ "${{ inputs.version }}" != "stable" ]; then
-          echo "AUTHENTIK_TAG=${{ inputs.version }}" >> .env
+          echo "AUTHENTIK_TAG=${{ inputs.version }}" >> "${{ steps.setup.outputs.dir }}/.env"
         fi
-        wget https://goauthentik.io/docker-compose.yml
+        wget https://goauthentik.io/docker-compose.yml -o "${{ steps.setup.outputs.dir }}/docker-compose.yml"
 
     - name: Add override
       shell: bash
@@ -89,11 +98,11 @@ runs:
       env:
         BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
       run: |
-        cat <<EOT >> docker-compose.override.yaml
+        cat <<EOT >> "${{ steps.setup.outputs.dir }}/docker-compose.override.yaml"
         services:
           server:
               volumes:
-                  - ${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
+                  - ${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
         EOT
 
     - name: Run
@@ -101,8 +110,8 @@ runs:
       id: run
       run: |
         export COMPOSE_PROJECT_NAME=authentik
-        docker compose pull -q
-        docker compose up -d
+        docker compose -f "${{ steps.setup.outputs.dir }}/docker-compose.yml" pull -q
+        docker compose -f "${{ steps.setup.outputs.dir }}/docker-compose.yml" up -d
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
         worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
@@ -112,4 +121,4 @@ runs:
         if [ "${{ inputs.wait }}" = "true" ]; then
           timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
         fi
-        docker compose logs
+        docker compose -f "${{ steps.setup.outputs.dir }}/docker-compose.yml" logs
