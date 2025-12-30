@@ -35,7 +35,12 @@ jobs:
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
               wait_command: |
-                while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)" != "200" ]]; do sleep 5; done
+                if [[ $RUNNER_DEBUG == '1' ]]; then
+                    set -x
+                fi
+                while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)" != "200" ]]; do
+                    sleep 5;
+                done
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
       - run: |

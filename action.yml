@@ -17,6 +17,9 @@ inputs:
     description: 'Command to check if authentik is running and configured'
     required: false
     default: |
+        if [[ $RUNNER_DEBUG == '1' ]]; then
+            set -x
+        fi
         while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do
             sleep 5;
         done
