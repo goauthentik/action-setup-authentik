@@ -20,8 +20,11 @@ inputs:
         if [[ $RUNNER_DEBUG == '1' ]]; then
             set -x
         fi
-        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do
-            sleep 5;
+        while true; do
+            status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
+            if [[ $status == "200" ]]; do
+                exit 0
+            fi
         done
   blueprints_path:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
@@ -91,11 +94,13 @@ runs:
         AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
         echo "::add-mask::${AUTHENTIK_BOOTSTRAP_TOKEN}"
         echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> "${ak_temp_dir}/.env"
+        echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_ENV
         echo "admin_token=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_OUTPUT
 
         AUTHENTIK_BOOTSTRAP_PASSWORD=$(openssl rand -base64 32)
         echo "::add-mask::${AUTHENTIK_BOOTSTRAP_PASSWORD}"
         echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> "${ak_temp_dir}/.env"
+        echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_ENV
         echo "admin_password=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_OUTPUT
 
     - name: Configure

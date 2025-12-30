@@ -34,11 +34,22 @@ jobs:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
+              wait: true
+          - label: "Blueprints + Wait (auth)"
+            options:
+              version: "stable"
+              sentry_env: "goauthentik-action-setup-authentik-ci"
+              blueprints_path: "./testing/blueprints"
               wait_command: |
                 if [[ $RUNNER_DEBUG == '1' ]]; then
                     set -x
                 fi
-                while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)" != "200" ]]; do
+                while true; do
+                    objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD} https://id.goauthentik.io/api/v3/providers/all/?search=test)
+                    count=$(echo $output | jq .pagination.count)
+                    if [[ "$count" == "1" ]]; then
+                        exit 0
+                    fi
                     sleep 5;
                 done
     steps:
