@@ -43,6 +43,7 @@ jobs:
                     if [[ $status == "200" ]]; then
                         exit 0
                     fi
+                    sleep 5
                 done
           - label: "Blueprints + Custom wait with auth"
             options:
@@ -59,7 +60,7 @@ jobs:
                     if [[ "$count" == "1" ]]; then
                         exit 0
                     fi
-                    sleep 5;
+                    sleep 5
                 done
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3

@@ -25,6 +25,7 @@ inputs:
           if [[ $status == "200" ]]; then
               exit 0
           fi
+          sleep 5
       done
   blueprints_path:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
