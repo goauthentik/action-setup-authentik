@@ -22,7 +22,7 @@ inputs:
         fi
         while true; do
             status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
-            if [[ $status == "200" ]]; do
+            if [[ $status == "200" ]]; then
                 exit 0
             fi
         done
