@@ -1,0 +1,11 @@
+# yaml-language-server: $schema=https://goauthentik.io/blueprints/schema.json
+---
+version: 1
+metadata:
+  name: test2
+entries:
+  - model: authentik_core.user
+    identifiers:
+      username: ci-test
+    attrs:
+      name: ci-test

@@ -154,7 +154,9 @@ runs:
       shell: bash
       run: |
         set -x
-        echo $blueprints_files
+        for fn in $blueprints_files; do
+          docker compose -f "${ak_temp_dir}/docker-compose.yml" exec worker "ak apply_blueprint action-setup-authentik/${fn}"
+        done
 
     - name: Wait
       shell: bash
