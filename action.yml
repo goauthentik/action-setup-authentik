@@ -117,7 +117,9 @@ runs:
       id: run
       run: |
         export COMPOSE_PROJECT_NAME=authentik
+        echo "--- Pulling authentik images..."
         docker compose -f "${ak_temp_dir}/docker-compose.yml" pull -q
+        echo "--- Starting authentik..."
         docker compose -f "${ak_temp_dir}/docker-compose.yml" up -d
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
@@ -130,7 +132,9 @@ runs:
         cat <<EOF > "${ak_temp_dir}/wait.sh"
         ${{ inputs.wait_command }}
         EOF
+
         if [ "${{ inputs.wait }}" = "true" ]; then
+          echo "Waiting for authentik to be up and running..."
           timeout 600 bash "${ak_temp_dir}/wait.sh" || false
         fi
         docker compose -f "${ak_temp_dir}/docker-compose.yml" logs
