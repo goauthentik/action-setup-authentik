@@ -38,5 +38,7 @@ jobs:
                 while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)" != "200" ]]; do sleep 5; done
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
+      - run: |
+          echo "RUNNER_DEBUG=1" >> $GITHUB_ENV
       - uses: ./
         with: ${{ matrix.cases.options }}
