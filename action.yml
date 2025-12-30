@@ -50,6 +50,7 @@ runs:
       shell: bash
       id: setup
       run: |
+        set -xeuo pipefail
         temp_dir="${RUNNER_TEMP}/${GITHUB_ACTION}"
         mkdir -p ${temp_dir}
 
