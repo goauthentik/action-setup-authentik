@@ -158,6 +158,7 @@ runs:
       shell: bash
       run: |
         set -x
+        export COMPOSE_PROJECT_NAME=authentik
         for fn in $blueprints_files; do
           docker compose -f "${ak_temp_dir}/docker-compose.yml" exec worker "ak apply_blueprint action-setup-authentik/${fn}"
         done
