@@ -106,8 +106,8 @@ runs:
         cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yaml"
         services:
           server:
-              volumes:
-                  - ${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
+            volumes:
+              - ${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik
         EOT
 
     - name: Run
