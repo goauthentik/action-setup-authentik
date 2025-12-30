@@ -29,11 +29,21 @@ jobs:
             options:
               version: "beta"
               sentry_env: "goauthentik-action-setup-authentik-ci"
-          - label: "Blueprints"
+          - label: "Blueprints + Custom wait"
             options:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
+              wait_command: |
+                if [[ $RUNNER_DEBUG == '1' ]]; then
+                    set -x
+                fi
+                while true; do
+                    status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
+                    if [[ $status == "200" ]]; then
+                        exit 0
+                    fi
+                done
           - label: "Blueprints + Custom wait with auth"
             options:
               version: "stable"
