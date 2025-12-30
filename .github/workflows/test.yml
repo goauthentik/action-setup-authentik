@@ -11,19 +11,30 @@ permissions:
   contents: read
 
 jobs:
-  run:
-    name: Run
+  test:
+    name: Test - ${{ matrix.cases.label }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
-        authentik_version:
-          - "stable"
-          - "beta"
+        cases:
+          - label: "Stable"
+            options:
+              version: "stable"
+              sentry_env: "goauthentik-action-setup-authentik-ci"
+          - label: "Beta"
+            options:
+              version: "beta"
+              sentry_env: "goauthentik-action-setup-authentik-ci"
+          - label: "Blueprints + Wait"
+            options:
+              version: "stable"
+              sentry_env: "goauthentik-action-setup-authentik-ci"
+              blueprints_path: "./testing/blueprints"
+              wait_command: |
+                while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)" != "200" ]]; do sleep 5; done
     steps:
       - uses: actions/checkout@v3
       - uses: ./
-        with:
-          version: ${{ matrix.authentik_version }}
-          sentry_env: goauthentik-action-setup-authentik-ci
+        with: ${{ matrix.cases.options }}

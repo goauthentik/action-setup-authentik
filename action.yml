@@ -5,16 +5,21 @@ inputs:
     description: 'stable/beta or any other version tag'
     required: false
     default: "stable"
-  wait:
-    description: 'If the action should wait for authentik to be available'
-    required: false
-    default: "true"
   sentry_env:
     description: 'Sentry environment to send traces to.'
     required: false
     default: "github-actions"
+  wait:
+    description: 'If the action should wait for authentik to be available'
+    required: false
+    default: "true"
+  wait_command:
+    description: 'Command to check if authentik is running and configured'
+    required: false
+    default: |
+        while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done
   blueprints_path:
-    description: "Optional path to a folder containing blueprints, which are mounted into the authentik containers."
+    description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
     required: false
     default: ""
 
@@ -119,6 +124,6 @@ runs:
         echo "worker_container=${worker_container}" >> $GITHUB_OUTPUT
 
         if [ "${{ inputs.wait }}" = "true" ]; then
-          timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)" != "200" ]]; do sleep 5; done' || false
+          timeout 600 bash -c "${{ inputs.wait_command }}" || false
         fi
         docker compose -f "${{ steps.setup.outputs.dir }}/docker-compose.yml" logs
