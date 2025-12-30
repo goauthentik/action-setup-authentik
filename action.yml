@@ -97,28 +97,31 @@ runs:
         fi
         wget https://goauthentik.io/docker-compose.yml -o "${ak_temp_dir}/docker-compose.yml"
 
-    - name: Add override
+    - name: Add blueprints override
       shell: bash
       if: ${{ inputs.blueprints_path != '' }}
       env:
         BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
       run: |
-        cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yaml"
+        set -xeuo pipefail
+        path=$(realpath "${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}")
+        cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
         services:
-          server:
+          worker:
             volumes:
-              - "${GITHUB_WORKSPACE}/${BLUEPRINTS_PATH}:/blueprints/action-setup-authentik"
+              - "${path}:/blueprints/action-setup-authentik"
         EOT
 
     - name: Run
       shell: bash
       id: run
       run: |
-        cat "${ak_temp_dir}/docker-compose.override.yaml"
-        cat "${ak_temp_dir}/docker-compose.yaml"
+        set -xeuo pipefail
+        cat "${ak_temp_dir}/docker-compose.override.yml"
+        cat "${ak_temp_dir}/docker-compose.yml"
         export COMPOSE_PROJECT_NAME=authentik
-        docker compose -f "${ak_temp_dir}/docker-compose.yml" pull -q
-        docker compose -f "${ak_temp_dir}/docker-compose.yml" up -d
+        docker compose -f "${ak_temp_dir}/docker-compose.yml" -f "${ak_temp_dir}/docker-compose.override.yml" pull -q
+        docker compose -f "${ak_temp_dir}/docker-compose.yml" -f "${ak_temp_dir}/docker-compose.override.yml" up -d
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
         worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
