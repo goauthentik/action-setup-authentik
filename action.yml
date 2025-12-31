@@ -13,20 +13,10 @@ inputs:
     description: 'If the action should wait for authentik to be available'
     required: false
     default: "true"
-  wait_command:
-    description: 'Command to check if authentik is running and configured'
+  wait_url:
+    description: 'URL to check if authentik is running and configured'
     required: false
-    default: |
-      if [[ $RUNNER_DEBUG == '1' ]]; then
-          set -x
-      fi
-      while true; do
-          status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/api/v3/root/config/)
-          if [[ $status == "200" ]]; then
-              exit 0
-          fi
-          sleep 5
-      done
+    default: http://localhost:9000/api/v3/root/config/
   blueprints_path:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
     required: false
@@ -171,13 +161,13 @@ runs:
 
     - name: Wait
       shell: bash
+      if: ${{ inputs.wait }}
+      env:
+        _AK_WAIT_URL: ${{ inputs.wait_url }}
+        _AK_TOKEN: ${{ steps.credentials.outputs.admin_token }}
       run: |
-        echo '${{ inputs.wait_command }}' > "${ak_temp_dir}/wait.sh"
-
-        if [ "${{ inputs.wait }}" = "true" ]; then
-          echo "Waiting for authentik to be up and running..."
-          timeout 600 bash "${ak_temp_dir}/wait.sh" || false
-        fi
+        echo "Waiting for authentik to be up and running..."
+        timeout 600 bash "${ak_temp_dir}/wait.sh" || false
 
     - name: Logs
       shell: bash

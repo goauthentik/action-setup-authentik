@@ -34,17 +34,7 @@ jobs:
               version: "stable"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
-              wait_command: |
-                if [[ $RUNNER_DEBUG == '1' ]]; then
-                    set -x
-                fi
-                while true; do
-                    status=$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost:9000/application/o/test/.well-known/openid-configuration)
-                    if [[ $status == "200" ]]; then
-                        exit 0
-                    fi
-                    sleep 5
-                done
+              wait_url: http://localhost:9000/application/o/test/.well-known/openid-configuration
           - label: "Blueprints + External wait"
             options:
               version: "stable"
@@ -68,4 +58,5 @@ jobs:
       - uses: ./
         with: ${{ matrix.cases.options }}
       - if: ${{ matrix.cases.test != '' }}
-        run: ${{ matrix.cases.test}}
+        timeout-minutes: 5
+        run: ${{ matrix.cases.test }}
