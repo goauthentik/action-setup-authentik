@@ -44,8 +44,7 @@ jobs:
               set -x
               while true; do
                   objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_TOKEN}" 'http://localhost:9000/api/v3/providers/all/?search=test')
-                  echo $output
-                  count=$(echo $output | jq .pagination.count)
+                  count=$(echo $objs | jq .pagination.count)
                   if [[ "$count" == "1" ]]; then
                       exit 0
                   fi
