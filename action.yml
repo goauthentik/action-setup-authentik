@@ -137,10 +137,12 @@ runs:
             set -x
         fi
         export COMPOSE_PROJECT_NAME=authentik
-        echo "--- Pulling authentik images..."
+        echo "::group::Pulling authentik images..."
         $_ak_dc pull -q
-        echo "--- Starting authentik..."
+        echo "::endgroup::"
+        echo "::group::Starting authentik..."
         $_ak_dc up -d --wait
+        echo "::endgroup::"
 
         server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
         worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
@@ -150,9 +152,11 @@ runs:
     - name: Apply blueprints
       shell: bash
       run: |
-        set -x
+        if [[ $RUNNER_DEBUG == '1' ]]; then
+            set -x
+        fi
+
         export COMPOSE_PROJECT_NAME=authentik
-        $_ak_dc exec worker find /blueprints
         for fn in $blueprints_files; do
           echo "::group::Blueprint $fn"
           $_ak_dc exec worker ak apply_blueprint action-setup-authentik/${fn}
@@ -167,7 +171,7 @@ runs:
         _AK_TOKEN: ${{ steps.credentials.outputs.admin_token }}
       run: |
         echo "Waiting for authentik to be up and running..."
-        timeout 600 bash "${ak_temp_dir}/wait.sh" || false
+        timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
 
     - name: Logs
       shell: bash
