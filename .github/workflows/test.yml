@@ -41,9 +41,7 @@ jobs:
               sentry_env: "goauthentik-action-setup-authentik-ci"
               blueprints_path: "./testing/blueprints"
             test: |
-              if [[ $RUNNER_DEBUG == '1' ]]; then
-                  set -x
-              fi
+              set -x
               while true; do
                   objs=$(curl -s -H "Authorization: Bearer ${AUTHENTIK_BOOTSTRAP_PASSWORD}" 'http://localhost:9000/api/v3/providers/all/?search=test')
                   echo $output
