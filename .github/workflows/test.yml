@@ -56,7 +56,10 @@ jobs:
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
       - uses: ./
+        id: setup
         with: ${{ matrix.cases.options }}
       - if: ${{ matrix.cases.test != '' }}
         timeout-minutes: 5
+        env:
+          AUTHENTIK_BOOTSTRAP_PASSWORD: ${{ steps.setup.outputs.admin_password }}
         run: ${{ matrix.cases.test }}
