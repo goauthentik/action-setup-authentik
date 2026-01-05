@@ -9,8 +9,8 @@ echo "EOF" >> $GITHUB_ENV
 
 cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
 services:
-    worker:
+  worker:
     volumes:
-        - "${path}:/blueprints/action-setup-authentik"
+      - "${path}:/blueprints/action-setup-authentik"
 EOT
 echo _ak_dc="$_ak_dc -f ${ak_temp_dir}/docker-compose.override.yml" >> $GITHUB_ENV
