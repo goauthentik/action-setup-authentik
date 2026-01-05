@@ -25,10 +25,10 @@ inputs:
 outputs:
   admin_token:
     description: "API token for akadmin User"
-    value: ${{ steps.credentials.outputs.admin_token }}
+    value: ${{ steps.prepare.outputs.admin_token }}
   admin_password:
     description: "Password for akadmin User"
-    value: ${{ steps.credentials.outputs.admin_password }}
+    value: ${{ steps.prepare.outputs.admin_password }}
   http_url:
     description: "Base URL to access authentik at"
     value: http://localhost:9000
@@ -45,66 +45,20 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Generate temp dir
+    - name: Prepare
       shell: bash
+      id: prepare
+      env:
+        INPUT_SENTRY_ENV: ${{ inputs.sentry_env }}
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-        temp_dir="${RUNNER_TEMP}/${GITHUB_ACTION}"
-        mkdir -p ${temp_dir}
-
-        echo "ak_temp_dir=${temp_dir}" >> $GITHUB_ENV
-
-    - name: Prepare common variables
-      shell: bash
-      run: |
-        pg_pass=$(openssl rand -base64 32)
-        secret_key=$(openssl rand -base64 40)
-
-        echo "::add-mask::${pg_pass}"
-        echo "::add-mask::${secret_key}"
-
-        echo "PG_PASS=${pg_pass}" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_SECRET_KEY=${secret_key}" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_ERROR_REPORTING__ENABLED=true" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_ERROR_REPORTING__ENVIRONMENT=${{ inputs.sentry_env }}" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_DISABLE_STARTUP_ANALYTICS=true" >> "${ak_temp_dir}/.env"
-        echo "CI" >> "${ak_temp_dir}/.env"
-
-    - name: Generate credentials
-      shell: bash
-      id: credentials
-      run: |
-        AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
-        echo "::add-mask::${AUTHENTIK_BOOTSTRAP_TOKEN}"
-        echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_ENV
-        echo "admin_token=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> $GITHUB_OUTPUT
-
-        AUTHENTIK_BOOTSTRAP_PASSWORD=$(openssl rand -base64 32)
-        echo "::add-mask::${AUTHENTIK_BOOTSTRAP_PASSWORD}"
-        echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> "${ak_temp_dir}/.env"
-        echo "AUTHENTIK_BOOTSTRAP_PASSWORD=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_ENV
-        echo "admin_password=${AUTHENTIK_BOOTSTRAP_PASSWORD}" >> $GITHUB_OUTPUT
+        ${GITHUB_ACTION_PATH}/prepare.sh
 
     - name: Configure
       shell: bash
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-            echo "AUTHENTIK_LOG_LEVEL=debug" >> "${ak_temp_dir}/.env"
-        fi
-        if [ "${{ inputs.version }}" = "beta" ]; then
-          echo "AUTHENTIK_IMAGE=ghcr.io/goauthentik/dev-server" >> "${ak_temp_dir}/.env"
-          echo "AUTHENTIK_TAG=gh-next" >> "${ak_temp_dir}/.env"
-          echo "AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE=ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s" >> "${ak_temp_dir}/.env"
-        elif [ "${{ inputs.version }}" != "stable" ]; then
-          echo "AUTHENTIK_TAG=${{ inputs.version }}" >> "${ak_temp_dir}/.env"
-        fi
-        wget --quiet https://goauthentik.io/docker-compose.yml -O "${ak_temp_dir}/docker-compose.yml"
-        echo _ak_dc="docker compose --env-file ${ak_temp_dir}/.env -f ${ak_temp_dir}/docker-compose.yml" >> $GITHUB_ENV
+        ${GITHUB_ACTION_PATH}/configure.sh
 
     - name: Add blueprints override
       shell: bash
@@ -112,63 +66,26 @@ runs:
       env:
         INPUT_BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-        path=$(realpath "${GITHUB_WORKSPACE}/${INPUT_BLUEPRINTS_PATH}")
-        blueprints_files=$(find "${path}" -type f -mindepth 1 -printf '%P\n')
-        echo "blueprints_files<<EOF" >> $GITHUB_ENV
-        echo "${blueprints_files}" >> $GITHUB_ENV
-        echo "EOF" >> $GITHUB_ENV
-
-        cat <<EOT >> "${ak_temp_dir}/docker-compose.override.yml"
-        services:
-          worker:
-            volumes:
-              - "${path}:/blueprints/action-setup-authentik"
-        EOT
-        echo _ak_dc="$_ak_dc -f ${ak_temp_dir}/docker-compose.override.yml" >> $GITHUB_ENV
+        ${GITHUB_ACTION_PATH}/override_blueprints.sh
 
     - name: Run
       shell: bash
       id: run
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-        export COMPOSE_PROJECT_NAME=authentik
-        echo "::group::Pulling authentik images..."
-        $_ak_dc pull -q
-        echo "::endgroup::"
-        echo "::group::Starting authentik..."
-        $_ak_dc up -d --wait
-        echo "::endgroup::"
-
-        server_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=server --format "{{.ID}}")
-        worker_container=$(docker ps -f label=com.docker.compose.project=authentik -f label=com.docker.compose.service=worker --format "{{.ID}}")
-        echo "server_container=${server_container}" >> $GITHUB_OUTPUT
-        echo "worker_container=${worker_container}" >> $GITHUB_OUTPUT
+        ${GITHUB_ACTION_PATH}/start.sh
 
     - name: Apply blueprints
       shell: bash
+      if: ${{ inputs.blueprints_path != '' }}
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-
-        export COMPOSE_PROJECT_NAME=authentik
-        for fn in $blueprints_files; do
-          echo "::group::Blueprint $fn"
-          $_ak_dc exec worker ak apply_blueprint action-setup-authentik/${fn}
-          echo "::endgroup::"
-        done
+        ${GITHUB_ACTION_PATH}/apply_blueprints.sh
 
     - name: Wait
       shell: bash
       if: ${{ inputs.wait }}
       env:
         _AK_WAIT_URL: ${{ inputs.wait_url }}
-        _AK_TOKEN: ${{ steps.credentials.outputs.admin_token }}
+        _AK_TOKEN: ${{ steps.prepare.outputs.admin_token }}
       run: |
         echo "Waiting for authentik to be up and running..."
         timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
@@ -177,7 +94,4 @@ runs:
       shell: bash
       if: ${{ always() }}
       run: |
-        export COMPOSE_PROJECT_NAME=authentik
-        echo "::group::authentik Logs"
-        $_ak_dc logs
-        echo "::endgroup::"
+        ${GITHUB_ACTION_PATH}/logs.sh
