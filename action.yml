@@ -47,6 +47,8 @@ runs:
   steps:
     - name: Prepare
       shell: bash
+      env:
+        INPUT_SENTRY_ENV: ${{ inputs.sentry_env }}
       run: |
         ${GITHUB_ACTION_PATH}/prepare.sh
 
