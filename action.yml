@@ -74,16 +74,7 @@ runs:
     - name: Apply blueprints
       shell: bash
       run: |
-        if [[ $RUNNER_DEBUG == '1' ]]; then
-            set -x
-        fi
-
-        export COMPOSE_PROJECT_NAME=authentik
-        for fn in $blueprints_files; do
-          echo "::group::Blueprint $fn"
-          $_ak_dc exec worker ak apply_blueprint action-setup-authentik/${fn}
-          echo "::endgroup::"
-        done
+        ${GITHUB_ACTION_PATH}/apply_blueprints.sh
 
     - name: Wait
       shell: bash
@@ -99,7 +90,4 @@ runs:
       shell: bash
       if: ${{ always() }}
       run: |
-        export COMPOSE_PROJECT_NAME=authentik
-        echo "::group::authentik Logs"
-        $_ak_dc logs
-        echo "::endgroup::"
+        ${GITHUB_ACTION_PATH}/logs.sh

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+source ${GITHUB_ACTION_PATH}/common.sh
 
 while true; do
     echo "Testing authentik with URL ${_AK_WAIT_URL}..."

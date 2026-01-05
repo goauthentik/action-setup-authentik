@@ -20,7 +20,6 @@ echo "AUTHENTIK_DISABLE_UPDATE_CHECK=true" >> "${ak_temp_dir}/.env"
 echo "AUTHENTIK_DISABLE_STARTUP_ANALYTICS=true" >> "${ak_temp_dir}/.env"
 echo "CI" >> "${ak_temp_dir}/.env"
 
-
 AUTHENTIK_BOOTSTRAP_TOKEN=$(openssl rand -base64 32)
 echo "::add-mask::${AUTHENTIK_BOOTSTRAP_TOKEN}"
 echo "AUTHENTIK_BOOTSTRAP_TOKEN=${AUTHENTIK_BOOTSTRAP_TOKEN}" >> "${ak_temp_dir}/.env"
