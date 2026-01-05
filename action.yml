@@ -84,6 +84,7 @@ runs:
       if: ${{ inputs.wait }}
       env:
         _AK_WAIT_URL: ${{ inputs.wait_url }}
+        _AK_TOKEN: ${{ steps.credentials.outputs.admin_token }}
       run: |
         echo "Waiting for authentik to be up and running..."
         timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
