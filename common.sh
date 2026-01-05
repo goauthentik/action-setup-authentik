@@ -1,5 +1,5 @@
 #!/bin/bash
 set -euo pipefail
-if [[ $RUNNER_DEBUG == '1' ]]; then
+if ! [[ -z ${RUNNER_DEBUG+x} ]]; then
     set -x
 fi
