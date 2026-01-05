@@ -25,10 +25,10 @@ inputs:
 outputs:
   admin_token:
     description: "API token for akadmin User"
-    value: ${{ steps.credentials.outputs.admin_token }}
+    value: ${{ steps.prepare.outputs.admin_token }}
   admin_password:
     description: "Password for akadmin User"
-    value: ${{ steps.credentials.outputs.admin_password }}
+    value: ${{ steps.prepare.outputs.admin_password }}
   http_url:
     description: "Base URL to access authentik at"
     value: http://localhost:9000
@@ -47,6 +47,7 @@ runs:
   steps:
     - name: Prepare
       shell: bash
+      id: prepare
       env:
         INPUT_SENTRY_ENV: ${{ inputs.sentry_env }}
       run: |
@@ -84,7 +85,7 @@ runs:
       if: ${{ inputs.wait }}
       env:
         _AK_WAIT_URL: ${{ inputs.wait_url }}
-        _AK_TOKEN: ${{ steps.credentials.outputs.admin_token }}
+        _AK_TOKEN: ${{ steps.prepare.outputs.admin_token }}
       run: |
         echo "Waiting for authentik to be up and running..."
         timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
