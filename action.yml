@@ -45,21 +45,10 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Generate temp dir
+    - name: Prepare
       shell: bash
       run: |
-        ${GITHUB_ACTION_PATH}/prepare_temp.sh
-
-    - name: Prepare common variables
-      shell: bash
-      run: |
-        ${GITHUB_ACTION_PATH}/prepare_vars.sh
-
-    - name: Generate credentials
-      shell: bash
-      id: credentials
-      run: |
-        ${GITHUB_ACTION_PATH}/prepare_creds.sh
+        ${GITHUB_ACTION_PATH}/prepare.sh
 
     - name: Configure
       shell: bash
