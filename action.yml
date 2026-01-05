@@ -75,6 +75,7 @@ runs:
 
     - name: Apply blueprints
       shell: bash
+      if: ${{ inputs.blueprints_path != '' }}
       run: |
         ${GITHUB_ACTION_PATH}/apply_blueprints.sh
 
