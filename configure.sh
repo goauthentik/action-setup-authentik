@@ -11,5 +11,5 @@ if [ "${INPUT_VERSION}" = "beta" ]; then
 elif [ "${INPUT_VERSION}" != "stable" ]; then
     echo "AUTHENTIK_TAG=${INPUT_VERSION}" >> "${ak_temp_dir}/.env"
 fi
-wget --quiet https://goauthentik.io/docker-compose.yml -O "${ak_temp_dir}/docker-compose.yml"
+wget --quiet https://goauthentik.io/compose.yml -O "${ak_temp_dir}/docker-compose.yml"
 echo _ak_dc="docker compose --env-file ${ak_temp_dir}/.env -f ${ak_temp_dir}/docker-compose.yml" >> "${GITHUB_ENV}"
