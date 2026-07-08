@@ -1,133 +1,57 @@
-name: 'authentik Setup'
-description: 'Sets up an authentik test environment'
+name: "authentik Setup"
+description: "Sets up an authentik test environment"
 inputs:
   version:
-    description: 'stable/beta or any other version tag'
+    description: "stable/beta or any other version tag"
     required: false
     default: "stable"
   sentry_env:
-    description: 'Sentry environment to send traces to.'
+    description: "Sentry environment to send traces to."
     required: false
     default: "github-actions"
   wait:
-    description: 'If the action should wait for authentik to be available'
+    description: "If the action should wait for authentik to be available"
     required: false
     default: "true"
   wait_url:
-    description: 'URL to check if authentik is running and configured'
+    description: "URL to check if authentik is running and configured"
     required: false
     default: http://localhost:9000/api/v3/root/config/
   blueprints_path:
-    description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
+    description: "Optional path to a folder containing blueprints, which are mounted into the authentik containers."
     required: false
     default: ""
   enterprise_license:
-    description: 'If set to true, automatically retrieve and install a dev enterprise license from the goauthentik customer portal. Requires the calling workflow to grant `permissions: id-token: write`.'
+    description: "If set to true, automatically retrieve and install a dev enterprise license from the goauthentik customer portal. Requires the calling workflow to grant `permissions: id-token: write`."
     required: false
     default: "false"
   enterprise_license_users_internal:
-    description: 'Number of internal users to request for the enterprise license.'
+    description: "Number of internal users to request for the enterprise license."
     required: false
     default: "1"
   enterprise_license_users_external:
-    description: 'Number of external users to request for the enterprise license.'
+    description: "Number of external users to request for the enterprise license."
     required: false
     default: "1"
 
 outputs:
   admin_token:
     description: "API token for akadmin User"
-    value: ${{ steps.prepare.outputs.admin_token }}
   admin_password:
     description: "Password for akadmin User"
-    value: ${{ steps.prepare.outputs.admin_password }}
   http_url:
     description: "Base URL to access authentik at"
-    value: http://localhost:9000
   https_url:
     description: "Base URL to access authentik at (HTTPS)"
-    value: https://localhost:9443
   server_container_id:
     description: id of the server container
-    value: ${{ steps.run.outputs.server_container }}
   worker_container_id:
     description: id of the worker container
-    value: ${{ steps.run.outputs.worker_container }}
   enterprise_license_key:
     description: The enterprise license key retrieved and installed, if `enterprise_license` is set to true
-    value: ${{ steps.get-enterprise-license.outputs.enterprise_license_key }}
 
 runs:
-  using: "composite"
-  steps:
-    - name: Prepare
-      shell: bash
-      id: prepare
-      env:
-        INPUT_SENTRY_ENV: ${{ inputs.sentry_env }}
-      run: |
-        ${GITHUB_ACTION_PATH}/prepare.sh
-
-    - name: Configure
-      shell: bash
-      env:
-        INPUT_VERSION: ${{ inputs.version }}
-      run: |
-        ${GITHUB_ACTION_PATH}/configure.sh
-
-    - name: Add blueprints override
-      shell: bash
-      if: ${{ inputs.blueprints_path != '' }}
-      env:
-        INPUT_BLUEPRINTS_PATH: ${{ inputs.blueprints_path }}
-      run: |
-        ${GITHUB_ACTION_PATH}/override_blueprints.sh
-
-    - name: Run
-      shell: bash
-      id: run
-      run: |
-        ${GITHUB_ACTION_PATH}/start.sh
-
-    - name: Apply blueprints
-      shell: bash
-      if: ${{ inputs.blueprints_path != '' }}
-      run: |
-        ${GITHUB_ACTION_PATH}/apply_blueprints.sh
-
-    - name: Wait
-      shell: bash
-      if: ${{ inputs.wait }}
-      env:
-        _AK_WAIT_URL: ${{ inputs.wait_url }}
-        _AK_TOKEN: ${{ steps.prepare.outputs.admin_token }}
-      run: |
-        echo "Waiting for authentik to be up and running..."
-        timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
-
-    - name: Get customer portal token
-      if: ${{ inputs.enterprise_license == 'true' }}
-      id: authentik-token
-      uses: goauthentik/configure-authentik-credentials@v1
-      with:
-        authentik_url: https://id.customers.goauthentik.io
-        client_id: "lq9mHxJPqvTHClDS2zACiCBwhzCk2eiWDs5xgcVvo1aKs4R00Q0QzLyBrwYyhoOq"
-        scope: "openid profile email"
-
-    - name: Get and install enterprise license
-      if: ${{ inputs.enterprise_license == 'true' }}
-      shell: bash
-      id: get-enterprise-license
-      env:
-        INPUT_ENTERPRISE_LICENSE_USERS_INTERNAL: ${{ inputs.enterprise_license_users_internal }}
-        INPUT_ENTERPRISE_LICENSE_USERS_EXTERNAL: ${{ inputs.enterprise_license_users_external }}
-        _AK_TOKEN: ${{ steps.prepare.outputs.admin_token }}
-        _AK_CUSTOMER_TOKEN: ${{ steps.authentik-token.outputs.token }}
-      run: |
-        ${GITHUB_ACTION_PATH}/get_enterprise_license.sh
-
-    - name: Logs
-      shell: bash
-      if: ${{ always() }}
-      run: |
-        ${GITHUB_ACTION_PATH}/logs.sh
+  using: node24
+  main: dist/index.js
+  post: dist/post.js
+  post-if: always()

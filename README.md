@@ -27,3 +27,20 @@ This action deploys a local authentik instance in Docker using compose.
 - `http_url`: http URL to access authentik
 - `https_url`: https URL to access authentik
 - `enterprise_license_key`: The enterprise license key retrieved and installed, if `enterprise_license` is set to true
+
+## Development
+
+This action is written in TypeScript (`src/`) and bundled to `dist/index.js` / `dist/post.js`
+with esbuild. The bundled output is committed so consumers don't need a build step.
+
+```bash
+npm install
+npm run build       # regenerate dist/index.js and dist/post.js
+npm run lint        # eslint
+npm run typecheck   # tsc --noEmit
+npm run format      # prettier --write
+```
+
+If you change anything under `src/`, run `npm run build` and commit the updated `dist/`
+output — CI (the `check-dist` job) fails the build if `dist/` doesn't match what
+`npm run build` produces from the current `src/`.
