@@ -11,7 +11,7 @@ export class ComposeCommand {
   }
 
   private baseArgs(): string[] {
-    const args = ["compose", "--env-file", this.envFile];
+    const args = ["compose", "-p", "authentik", "--env-file", this.envFile];
     for (const f of this.composeFiles) {
       args.push("-f", f);
     }

@@ -19999,7 +19999,7 @@ var ComposeCommand = class {
     this.composeFiles.push(filePath);
   }
   baseArgs() {
-    const args = ["compose", "--env-file", this.envFile];
+    const args = ["compose", "-p", "authentik", "--env-file", this.envFile];
     for (const f of this.composeFiles) {
       args.push("-f", f);
     }
@@ -20115,7 +20115,6 @@ async function waitForReady(url, token, timeoutMs = 6e5) {
 // src/index.ts
 async function run() {
   try {
-    process.env.COMPOSE_PROJECT_NAME = "authentik";
     const inputs = getInputs();
     core7.setOutput("http_url", "http://localhost:9000");
     core7.setOutput("https_url", "https://localhost:9443");

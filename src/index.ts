@@ -16,8 +16,6 @@ import { startAuthentik, waitForReady } from "./start.js";
 
 async function run(): Promise<void> {
   try {
-    process.env.COMPOSE_PROJECT_NAME = "authentik";
-
     const inputs = getInputs();
     core.setOutput("http_url", "http://localhost:9000");
     core.setOutput("https_url", "https://localhost:9443");
