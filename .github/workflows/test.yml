@@ -27,8 +27,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run lint
-      - run: npm run typecheck
-      - run: npm run build
+      - run: npm run bundle
       - name: Compare dist/ directory
         run: |
           if [ "$(git status --porcelain dist/ | wc -l)" -gt "0" ]; then
