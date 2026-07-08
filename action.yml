@@ -111,7 +111,7 @@ runs:
       uses: goauthentik/configure-authentik-credentials@v1
       with:
         authentik_url: https://id.customers.goauthentik.io
-        client_id: "customer-portal"
+        client_id: "lq9mHxJPqvTHClDS2zACiCBwhzCk2eiWDs5xgcVvo1aKs4R00Q0QzLyBrwYyhoOq"
         scope: "openid profile email"
 
     - name: Get and install enterprise license

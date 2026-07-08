@@ -37,10 +37,6 @@ jobs:
               version: "beta"
               sentry_env: "goauthentik-action-setup-authentik-ci"
               enterprise_license: true
-          - label: "Beta"
-            options:
-              version: "beta"
-              sentry_env: "goauthentik-action-setup-authentik-ci"
           - label: "Blueprints + Custom wait"
             options:
               version: "stable"
