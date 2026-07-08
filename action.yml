@@ -21,6 +21,18 @@ inputs:
     description: 'Optional path to a folder containing blueprints, which are mounted into the authentik containers.'
     required: false
     default: ""
+  enterprise_license:
+    description: 'If set to true, automatically retrieve and install a dev enterprise license from the goauthentik customer portal. Requires the calling workflow to grant `permissions: id-token: write`.'
+    required: false
+    default: "false"
+  enterprise_license_users_internal:
+    description: 'Number of internal users to request for the enterprise license.'
+    required: false
+    default: "1"
+  enterprise_license_users_external:
+    description: 'Number of external users to request for the enterprise license.'
+    required: false
+    default: "1"
 
 outputs:
   admin_token:
@@ -41,6 +53,9 @@ outputs:
   worker_container_id:
     description: id of the worker container
     value: ${{ steps.run.outputs.worker_container }}
+  enterprise_license_key:
+    description: The enterprise license key retrieved and installed, if `enterprise_license` is set to true
+    value: ${{ steps.get-enterprise-license.outputs.enterprise_license_key }}
 
 runs:
   using: "composite"
@@ -89,6 +104,27 @@ runs:
       run: |
         echo "Waiting for authentik to be up and running..."
         timeout 600 bash "${GITHUB_ACTION_PATH}/wait.sh" || false
+
+    - name: Get customer portal token
+      if: ${{ inputs.enterprise_license == 'true' }}
+      id: authentik-token
+      uses: goauthentik/configure-authentik-credentials@v1
+      with:
+        authentik_url: https://id.customers.goauthentik.io
+        client_id: "lq9mHxJPqvTHClDS2zACiCBwhzCk2eiWDs5xgcVvo1aKs4R00Q0QzLyBrwYyhoOq"
+        scope: "openid profile email"
+
+    - name: Get and install enterprise license
+      if: ${{ inputs.enterprise_license == 'true' }}
+      shell: bash
+      id: get-enterprise-license
+      env:
+        INPUT_ENTERPRISE_LICENSE_USERS_INTERNAL: ${{ inputs.enterprise_license_users_internal }}
+        INPUT_ENTERPRISE_LICENSE_USERS_EXTERNAL: ${{ inputs.enterprise_license_users_external }}
+        _AK_TOKEN: ${{ steps.prepare.outputs.admin_token }}
+        _AK_CUSTOMER_TOKEN: ${{ steps.authentik-token.outputs.token }}
+      run: |
+        ${GITHUB_ACTION_PATH}/get_enterprise_license.sh
 
     - name: Logs
       shell: bash

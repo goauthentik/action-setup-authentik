@@ -18,6 +18,8 @@ jobs:
     name: Test - ${{ matrix.cases.label }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    permissions:
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -30,6 +32,11 @@ jobs:
             options:
               version: "beta"
               sentry_env: "goauthentik-action-setup-authentik-ci"
+          - label: "Enterprise"
+            options:
+              version: "beta"
+              sentry_env: "goauthentik-action-setup-authentik-ci"
+              enterprise_license: true
           - label: "Blueprints + Custom wait"
             options:
               version: "stable"
