@@ -38,6 +38,21 @@ export class ComposeCommand {
     return [...new Set(images)].sort();
   }
 
+  async listServices(): Promise<string[]> {
+    let output = "";
+    await exec.exec("docker", [...this.baseArgs(), "config", "--services"], {
+      listeners: {
+        stdout: (data: Buffer) => {
+          output += data.toString();
+        },
+      },
+    });
+    return output
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+  }
+
   async up(): Promise<void> {
     await exec.exec("docker", [...this.baseArgs(), "up", "-d", "--wait"]);
   }
@@ -70,7 +85,7 @@ export class ComposeCommand {
     await exec.exec("docker", [...this.baseArgs(), "exec", service, ...cmd]);
   }
 
-  async logs(): Promise<void> {
-    await exec.exec("docker", [...this.baseArgs(), "logs"]);
+  async logs(service: string): Promise<void> {
+    await exec.exec("docker", [...this.baseArgs(), "logs", service]);
   }
 }

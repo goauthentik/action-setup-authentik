@@ -27287,6 +27287,20 @@ class ComposeCommand {
             .filter((line) => line.length > 0);
         return [...new Set(images)].sort();
     }
+    async listServices() {
+        let output = "";
+        await execExports.exec("docker", [...this.baseArgs(), "config", "--services"], {
+            listeners: {
+                stdout: (data) => {
+                    output += data.toString();
+                },
+            },
+        });
+        return output
+            .split("\n")
+            .map((line) => line.trim())
+            .filter((line) => line.length > 0);
+    }
     async up() {
         await execExports.exec("docker", [...this.baseArgs(), "up", "-d", "--wait"]);
     }
@@ -27312,10 +27326,10 @@ class ComposeCommand {
     async execInService(service, cmd) {
         await execExports.exec("docker", [...this.baseArgs(), "exec", service, ...cmd]);
     }
-    async logs() {
-        await execExports.exec("docker", [...this.baseArgs(), "logs"]);
+    async logs(service) {
+        await execExports.exec("docker", [...this.baseArgs(), "logs", service]);
     }
 }
 
 export { ComposeCommand as C, commonjsGlobal as a, coreExports as c, execExports as e, getDefaultExportFromCjs as g, requireTunnel as r };
-//# sourceMappingURL=dockerCompose-BoG5HYZU.js.map
+//# sourceMappingURL=dockerCompose-Bp9YQJT1.js.map

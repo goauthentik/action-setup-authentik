@@ -1,4 +1,4 @@
-import { c as coreExports, C as ComposeCommand } from './dockerCompose-BoG5HYZU.js';
+import { c as coreExports, C as ComposeCommand } from './dockerCompose-Bp9YQJT1.js';
 import 'os';
 import 'crypto';
 import 'fs';
@@ -39,7 +39,15 @@ async function post() {
         }
         const composeFiles = JSON.parse(composeFilesState);
         const compose = new ComposeCommand(envFilePath, composeFiles);
-        await coreExports.group("authentik Logs", () => compose.logs());
+        const services = await compose.listServices();
+        for (const service of services) {
+            try {
+                await coreExports.group(`authentik Logs: ${service}`, () => compose.logs(service));
+            }
+            catch (error) {
+                coreExports.warning(`Failed to dump logs for ${service}: ${error instanceof Error ? error.message : String(error)}`);
+            }
+        }
     }
     catch (error) {
         coreExports.warning(`Failed to dump authentik logs: ${error instanceof Error ? error.message : String(error)}`);
