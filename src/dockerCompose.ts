@@ -22,6 +22,22 @@ export class ComposeCommand {
     await exec.exec("docker", [...this.baseArgs(), "pull", "-q"]);
   }
 
+  async listImages(): Promise<string[]> {
+    let output = "";
+    await exec.exec("docker", [...this.baseArgs(), "config", "--images"], {
+      listeners: {
+        stdout: (data: Buffer) => {
+          output += data.toString();
+        },
+      },
+    });
+    const images = output
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+    return [...new Set(images)].sort();
+  }
+
   async up(): Promise<void> {
     await exec.exec("docker", [...this.baseArgs(), "up", "-d", "--wait"]);
   }

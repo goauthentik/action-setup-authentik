@@ -8,6 +8,7 @@ import {
   composeFilePath,
   createTempDir,
   envFilePath,
+  imageCacheTarPath,
   overrideComposeFilePath,
   EnvFile,
 } from "./env.js";
@@ -49,7 +50,11 @@ async function run(): Promise<void> {
     core.saveState("composeFiles", JSON.stringify(compose.composeFiles));
     core.saveState("envFilePath", envFile.path);
 
-    const { serverContainerId, workerContainerId } = await startAuthentik(compose);
+    const { serverContainerId, workerContainerId } = await startAuthentik(
+      compose,
+      inputs.cache,
+      imageCacheTarPath(tempDir),
+    );
     core.setOutput("server_container_id", serverContainerId);
     core.setOutput("worker_container_id", workerContainerId);
 

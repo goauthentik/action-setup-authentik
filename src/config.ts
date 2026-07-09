@@ -6,6 +6,7 @@ export interface Inputs {
   wait: boolean;
   waitUrl: string;
   blueprintsPath: string;
+  cache: boolean;
   enterpriseLicense: boolean;
   enterpriseLicenseUsersInternal: string;
   enterpriseLicenseUsersExternal: string;
@@ -18,6 +19,7 @@ export function getInputs(): Inputs {
     wait: core.getBooleanInput("wait"),
     waitUrl: core.getInput("wait_url") || "http://localhost:9000/api/v3/root/config/",
     blueprintsPath: core.getInput("blueprints_path"),
+    cache: core.getBooleanInput("cache"),
     enterpriseLicense: core.getBooleanInput("enterprise_license"),
     enterpriseLicenseUsersInternal: core.getInput("enterprise_license_users_internal") || "1",
     enterpriseLicenseUsersExternal: core.getInput("enterprise_license_users_external") || "1",

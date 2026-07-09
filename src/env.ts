@@ -25,6 +25,10 @@ export function overrideComposeFilePath(tempDir: string): string {
   return path.join(tempDir, "docker-compose.override.yml");
 }
 
+export function imageCacheTarPath(tempDir: string): string {
+  return path.join(tempDir, "docker-images.tar");
+}
+
 export class EnvFile {
   private readonly lines: string[] = [];
 

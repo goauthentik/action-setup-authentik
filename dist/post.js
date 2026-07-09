@@ -1,4 +1,4 @@
-import { c as coreExports, C as ComposeCommand } from './dockerCompose-IWTkVkmg.js';
+import { c as coreExports, C as ComposeCommand } from './dockerCompose-BoG5HYZU.js';
 import 'os';
 import 'crypto';
 import 'fs';

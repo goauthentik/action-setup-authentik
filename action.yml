@@ -21,6 +21,10 @@ inputs:
     description: "Optional path to a folder containing blueprints, which are mounted into the authentik containers."
     required: false
     default: ""
+  cache:
+    description: "If set to true, cache the required container images using the GitHub Actions cache to speed up subsequent runs."
+    required: false
+    default: "true"
   enterprise_license:
     description: "If set to true, automatically retrieve and install a dev enterprise license from the goauthentik customer portal. Requires the calling workflow to grant `permissions: id-token: write`."
     required: false

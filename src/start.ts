@@ -1,13 +1,32 @@
 import * as core from "@actions/core";
 import type { ComposeCommand } from "./dockerCompose.js";
+import { restoreImageCache, saveImageCache } from "./imageCache.js";
 
 export interface StartResult {
   serverContainerId: string;
   workerContainerId: string;
 }
 
-export async function startAuthentik(compose: ComposeCommand): Promise<StartResult> {
+export async function startAuthentik(
+  compose: ComposeCommand,
+  cacheEnabled: boolean,
+  imageCacheTarPath: string,
+): Promise<StartResult> {
+  let cacheHit = false;
+  if (cacheEnabled) {
+    cacheHit = await core.group("Restoring cached authentik images...", () =>
+      restoreImageCache(compose, imageCacheTarPath),
+    );
+  }
+
   await core.group("Pulling authentik images...", () => compose.pull());
+
+  if (cacheEnabled && !cacheHit) {
+    await core.group("Caching authentik images...", () =>
+      saveImageCache(compose, imageCacheTarPath),
+    );
+  }
+
   await core.group("Starting authentik...", () => compose.up());
 
   const serverContainerId = await compose.containerIdByLabel("server");
