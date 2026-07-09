@@ -58,9 +58,25 @@ function buildOverrideComposeContent(hostPath) {
 function writeOverrideFile(destPath, hostPath) {
     fs.writeFileSync(destPath, buildOverrideComposeContent(hostPath));
 }
+async function execWithRetry(fn, timeoutMs = 120_000) {
+    const deadline = Date.now() + timeoutMs;
+    for (;;) {
+        try {
+            await fn();
+            return;
+        }
+        catch (error) {
+            if (Date.now() >= deadline) {
+                throw error;
+            }
+            coreExports.warning(`Blueprint apply failed, retrying in 5s: ${error.message}`);
+            await new Promise((resolve) => setTimeout(resolve, 5000));
+        }
+    }
+}
 async function applyBlueprints(compose, files) {
     for (const fn of files) {
-        await coreExports.group(`Blueprint ${fn}`, () => compose.execInService("worker", ["ak", "apply_blueprint", `action-setup-authentik/${fn}`]));
+        await coreExports.group(`Blueprint ${fn}`, () => execWithRetry(() => compose.execInService("worker", ["ak", "apply_blueprint", `action-setup-authentik/${fn}`])));
     }
 }
 

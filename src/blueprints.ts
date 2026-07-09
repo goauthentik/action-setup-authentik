@@ -35,10 +35,29 @@ export function writeOverrideFile(destPath: string, hostPath: string): void {
   fs.writeFileSync(destPath, buildOverrideComposeContent(hostPath));
 }
 
+async function execWithRetry(fn: () => Promise<void>, timeoutMs = 120_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+
+  for (;;) {
+    try {
+      await fn();
+      return;
+    } catch (error) {
+      if (Date.now() >= deadline) {
+        throw error;
+      }
+      core.warning(`Blueprint apply failed, retrying in 5s: ${(error as Error).message}`);
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+  }
+}
+
 export async function applyBlueprints(compose: ComposeCommand, files: string[]): Promise<void> {
   for (const fn of files) {
     await core.group(`Blueprint ${fn}`, () =>
-      compose.execInService("worker", ["ak", "apply_blueprint", `action-setup-authentik/${fn}`]),
+      execWithRetry(() =>
+        compose.execInService("worker", ["ak", "apply_blueprint", `action-setup-authentik/${fn}`]),
+      ),
     );
   }
 }
