@@ -1,4 +1,4 @@
-import { c as coreExports, C as ComposeCommand } from './dockerCompose-JLIjGAKg.js';
+import { r as getState, d as debug, C as ComposeCommand, g as group, w as warning } from './dockerCompose-BmRLP88Q.js';
 import 'os';
 import 'crypto';
 import 'fs';
@@ -10,31 +10,34 @@ import 'tls';
 import 'events';
 import 'assert';
 import 'util';
-import 'stream';
-import 'buffer';
-import 'querystring';
-import 'stream/web';
+import 'node:assert';
+import 'node:net';
+import 'node:http';
 import 'node:stream';
+import 'node:buffer';
 import 'node:util';
+import 'node:querystring';
 import 'node:events';
-import 'worker_threads';
-import 'perf_hooks';
-import 'util/types';
-import 'async_hooks';
-import 'console';
-import 'url';
-import 'zlib';
+import 'node:diagnostics_channel';
+import 'node:tls';
+import 'node:zlib';
+import 'node:perf_hooks';
+import 'node:util/types';
+import 'node:worker_threads';
+import 'node:url';
+import 'node:async_hooks';
+import 'node:console';
+import 'node:dns';
 import 'string_decoder';
-import 'diagnostics_channel';
 import 'child_process';
 import 'timers';
 
 async function post() {
     try {
-        const envFilePath = coreExports.getState("envFilePath");
-        const composeFilesState = coreExports.getState("composeFiles");
+        const envFilePath = getState("envFilePath");
+        const composeFilesState = getState("composeFiles");
         if (!envFilePath || !composeFilesState) {
-            coreExports.debug("No compose state saved by the main step, skipping log dump.");
+            debug("No compose state saved by the main step, skipping log dump.");
             return;
         }
         const composeFiles = JSON.parse(composeFilesState);
@@ -42,15 +45,15 @@ async function post() {
         const services = await compose.listServices();
         for (const service of services) {
             try {
-                await coreExports.group(`authentik Logs: ${service}`, () => compose.logs(service));
+                await group(`authentik Logs: ${service}`, () => compose.logs(service));
             }
             catch (error) {
-                coreExports.warning(`Failed to dump logs for ${service}: ${error instanceof Error ? error.message : String(error)}`);
+                warning(`Failed to dump logs for ${service}: ${error instanceof Error ? error.message : String(error)}`);
             }
         }
     }
     catch (error) {
-        coreExports.warning(`Failed to dump authentik logs: ${error instanceof Error ? error.message : String(error)}`);
+        warning(`Failed to dump authentik logs: ${error instanceof Error ? error.message : String(error)}`);
     }
 }
 post();
