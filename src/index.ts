@@ -69,13 +69,17 @@ async function run(): Promise<void> {
 
     if (inputs.enterpriseLicense) {
       const customerToken = await getCustomerPortalToken();
-      const licenseKey = await getAndInstallEnterpriseLicense(
-        adminToken,
-        customerToken,
-        inputs.enterpriseLicenseUsersInternal,
-        inputs.enterpriseLicenseUsersExternal,
-      );
-      core.setOutput("enterprise_license_key", licenseKey);
+      try {
+        const licenseKey = await getAndInstallEnterpriseLicense(
+          adminToken,
+          customerToken,
+          inputs.enterpriseLicenseUsersInternal,
+          inputs.enterpriseLicenseUsersExternal,
+        );
+        core.setOutput("enterprise_license_key", licenseKey);
+      } catch (exc) {
+        core.warning(`Failed to get enterprise license: ${exc}`);
+      }
     }
   } catch (error) {
     core.setFailed(error instanceof Error ? error.message : String(error));

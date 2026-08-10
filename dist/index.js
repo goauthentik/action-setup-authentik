@@ -53241,8 +53241,13 @@ async function run() {
         }
         if (inputs.enterpriseLicense) {
             const customerToken = await getCustomerPortalToken();
-            const licenseKey = await getAndInstallEnterpriseLicense(adminToken, customerToken, inputs.enterpriseLicenseUsersInternal, inputs.enterpriseLicenseUsersExternal);
-            setOutput("enterprise_license_key", licenseKey);
+            try {
+                const licenseKey = await getAndInstallEnterpriseLicense(adminToken, customerToken, inputs.enterpriseLicenseUsersInternal, inputs.enterpriseLicenseUsersExternal);
+                setOutput("enterprise_license_key", licenseKey);
+            }
+            catch (exc) {
+                warning(`Failed to get enterprise license: ${exc}`);
+            }
         }
     }
     catch (error) {
