@@ -53240,8 +53240,8 @@ async function run() {
             await waitForReady(inputs.waitUrl, adminToken);
         }
         if (inputs.enterpriseLicense) {
-            const customerToken = await getCustomerPortalToken();
             try {
+                const customerToken = await getCustomerPortalToken();
                 const licenseKey = await getAndInstallEnterpriseLicense(adminToken, customerToken, inputs.enterpriseLicenseUsersInternal, inputs.enterpriseLicenseUsersExternal);
                 setOutput("enterprise_license_key", licenseKey);
             }

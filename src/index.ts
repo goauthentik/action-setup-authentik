@@ -68,8 +68,8 @@ async function run(): Promise<void> {
     }
 
     if (inputs.enterpriseLicense) {
-      const customerToken = await getCustomerPortalToken();
       try {
+        const customerToken = await getCustomerPortalToken();
         const licenseKey = await getAndInstallEnterpriseLicense(
           adminToken,
           customerToken,
