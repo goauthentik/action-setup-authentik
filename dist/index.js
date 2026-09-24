@@ -237,6 +237,13 @@ async function configure(inputs, envFile, composeFilePath) {
         envFile.set("AUTHENTIK_TAG", "gh-next");
         envFile.set("AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE", "ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s");
     }
+    else if (inputs.version.indexOf(":") !== -1) {
+        const [image, tag] = inputs.version.split(":");
+        envFile.set("AUTHENTIK_IMAGE", image);
+        envFile.set("AUTHENTIK_TAG", tag);
+        const imageBase = image.replaceAll("server", "");
+        envFile.set("AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE", `${imageBase}-%(type)s:gh-%(build_hash)s`);
+    }
     else if (inputs.version !== "stable") {
         envFile.set("AUTHENTIK_TAG", inputs.version);
     }
