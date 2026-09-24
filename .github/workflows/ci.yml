@@ -55,6 +55,11 @@ jobs:
             options:
               version: "beta"
               sentry_env: "goauthentik-action-setup-authentik-ci"
+          - label: "Dev tag"
+            options:
+              # Equivalent to setting `version` to `beta`
+              version: ghcr.io/goauthentik/dev-server:gh-next
+              sentry_env: "goauthentik-action-setup-authentik-ci"
           - label: "Enterprise"
             options:
               version: "beta"
