@@ -221,6 +221,7 @@ function prepare(inputs, envFile) {
     envFile.set("AUTHENTIK_ERROR_REPORTING__ENVIRONMENT", inputs.sentryEnv);
     envFile.set("AUTHENTIK_DISABLE_UPDATE_CHECK", "true");
     envFile.set("AUTHENTIK_DISABLE_STARTUP_ANALYTICS", "true");
+    envFile.set("AUTHENTIK_WEB__BASE_URL", "http://localhost:9000");
     envFile.set("CI", "true");
     const adminToken = generateSecret(32);
     envFile.set("AUTHENTIK_BOOTSTRAP_TOKEN", adminToken);
