@@ -237,7 +237,7 @@ async function configure(inputs, envFile, composeFilePath) {
         envFile.set("AUTHENTIK_OUTPOSTS__DOCKER_IMAGE_BASE", "ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s");
     }
     else if (inputs.version.indexOf(":") !== -1) {
-        const [image, tag] = inputs.version.split(":");
+        const { image, tag } = splitImageReference(inputs.version);
         envFile.set("AUTHENTIK_IMAGE", image);
         envFile.set("AUTHENTIK_TAG", tag);
         const imageBase = image.replaceAll("server", "");
@@ -252,6 +252,13 @@ async function configure(inputs, envFile, composeFilePath) {
     }
     fs.writeFileSync(composeFilePath, await resp.text());
     return new ComposeCommand(envFile.path, [composeFilePath]);
+}
+/**
+ * Split `image:tag` on the last colon, so a registry port stays part of the image.
+ */
+function splitImageReference(reference) {
+    const index = reference.lastIndexOf(":");
+    return { image: reference.slice(0, index), tag: reference.slice(index + 1) };
 }
 
 /**
