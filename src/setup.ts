@@ -50,7 +50,7 @@ export async function configure(
       "ghcr.io/goauthentik/dev-%(type)s:gh-%(build_hash)s",
     );
   } else if (inputs.version.indexOf(":") !== -1) {
-    const [image, tag] = inputs.version.split(":");
+    const { image, tag } = splitImageReference(inputs.version);
     envFile.set("AUTHENTIK_IMAGE", image);
     envFile.set("AUTHENTIK_TAG", tag);
     const imageBase = image.replaceAll("server", "");
@@ -66,4 +66,13 @@ export async function configure(
   fs.writeFileSync(composeFilePath, await resp.text());
 
   return new ComposeCommand(envFile.path, [composeFilePath]);
+}
+
+/**
+ * Split `image:tag` on the last colon, so a registry port stays part of the image.
+ */
+export function splitImageReference(reference: string): { image: string; tag: string } {
+  const index = reference.lastIndexOf(":");
+
+  return { image: reference.slice(0, index), tag: reference.slice(index + 1) };
 }
