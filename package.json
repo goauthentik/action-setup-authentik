@@ -34,16 +34,16 @@
     "@typescript-eslint/eslint-plugin": "^8.72.1",
     "@typescript-eslint/parser": "^8.32.1",
     "@vercel/ncc": "^0.45.0",
-    "@vitest/coverage-v8": "^5.0.5",
+    "@vitest/coverage-v8": "^5.1.0",
     "@vitest/eslint-plugin": "^1.6.28",
-    "eslint": "^10.13.0",
+    "eslint": "^10.14.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-plugin-jsonc": "^3.4.2",
     "eslint-plugin-prettier": "^5.5.7",
-    "globals": "^17.13.0",
+    "globals": "^17.14.0",
     "prettier": "^3.9.10",
     "prettier-eslint": "^17.1.2",
-    "rollup": "^4.66.0",
+    "rollup": "^4.67.5",
     "typescript": "^6.0.3"
   }
 }
