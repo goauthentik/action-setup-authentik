@@ -31,7 +31,7 @@
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.1",
     "@types/node": "^26.6.6",
-    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/eslint-plugin": "^8.72.2",
     "@typescript-eslint/parser": "^8.32.1",
     "@vercel/ncc": "^0.45.0",
     "@vitest/coverage-v8": "^5.1.0",
@@ -41,9 +41,9 @@
     "eslint-plugin-jsonc": "^3.4.2",
     "eslint-plugin-prettier": "^5.5.7",
     "globals": "^17.14.0",
-    "prettier": "^3.9.10",
+    "prettier": "^3.10.1",
     "prettier-eslint": "^17.1.2",
-    "rollup": "^4.67.5",
+    "rollup": "^4.68.2",
     "typescript": "^6.0.3"
   }
 }
